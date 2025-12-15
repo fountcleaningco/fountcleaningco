@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Button from './Button';
-// We no longer need EMAIL here for mailto, but we'll leave it just in case:
 import { EMAIL } from '../constants'; 
 
 interface EstimateModalProps {
@@ -73,15 +72,12 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    {/* Form tag has the name and method, no netlify/data-netlify attribute */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
                         onSubmit={handleSubmit} 
                         className="space-y-4"
                     >
-                        {/* We use the code above to extract the name, so this explicit input is technically redundant 
-                            with the manual encoding above, but we leave it for redundancy as a fallback. */}
                         <input type="hidden" name="form-name" value="estimate-request" />
 
                         <div>
@@ -133,7 +129,6 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                             <Button type="submit" className="w-full">
                                 Send Estimate Request
                             </Button>
-                            {/* FIX APPLIED HERE: Added the missing '>' to close the tag */}
                             <Button type="button" variant="outline" className="w-full" onClick={onClose}> 
                                 Cancel
                             </Button>
@@ -158,5 +153,11 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
+        {/* ADDED MISSING CLOSING TAGS HERE */}
         </div>
       </div>
+    </div>
+  );
+};
+
+export default EstimateModal;

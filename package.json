@@ -11,8 +11,6 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    
-    // CRITICAL FIX: Adding the required dependency for the Netlify Function
     "@google/genai": "^1.30.0" 
   },
   "devDependencies": {

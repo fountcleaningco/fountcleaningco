@@ -1,9 +1,9 @@
 [build]
   # IMPORTANT: Tells Netlify where to find the finished website files after the build.
-  publish = "dist" 
+  publish = "dist"  
   
   # Sets the path to your serverless functions (use "functions" or "netlify/functions" depending on your setup)
-  functions = "functions" 
+  functions = "functions"  
   
 [[headers]]
   for = "/*"
@@ -12,3 +12,21 @@
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com;"
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
+
+# ====================================================================
+# REQUIRED REDIRECTS TO FIX SPA ROUTING AND FORM SUBMISSION
+# ====================================================================
+
+[[redirects]]
+  # 1. FIXES 404 ON REFRESH: Ensures all routing goes to index.html for React Router to handle.
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  # 2. FIXES 404 ON FORM POST: Explicitly defines the form's success page.
+  # The form post is intercepted by Netlify and then redirects the user back to the home page (/).
+  from = "/?form-name=estimate-request" 
+  to = "/?submission-success=true" 
+  status = 302
+  force = true

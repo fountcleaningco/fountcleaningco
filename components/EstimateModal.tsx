@@ -20,11 +20,16 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
     const form = e.currentTarget;
     const formData = new FormData(form);
     
-    // ATOMIC ENCODING (Form-name must be first)
-    let encoded = `form-name=${encodeURIComponent('estimate-request')}`;
+    // ATOMIC ENCODING (Starts with form-name from the hidden field)
+    let encoded = `form-name=${encodeURIComponent(form.getAttribute('name') || '')}`;
 
+    // Append all other form data fields
     for (const [key, value] of formData.entries()) {
-        encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+        // Skip the _next field as it's not needed for the body, only for HTML POST.
+        // We also rely on the form's name attribute, so we don't need the hidden form-name field here.
+        if (key !== '_next' && key !== 'form-name') {
+            encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+        }
     }
 
     try {
@@ -40,12 +45,12 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
         setSubmitted(true);
       } else {
         // FAILURE: Show the alert
-        alert('Form submission failed. Please try again or email us directly.');
+        alert('Form submission failed. Please ensure all fields are valid and try again. If the problem persists, please email us directly.');
         console.error('Netlify response was not OK:', response.statusText);
       }
     } catch (error) {
       console.error("Submission error:", error);
-      alert('An unexpected error occurred.');
+      alert('An unexpected error occurred during submission.');
     }
   };
 
@@ -71,14 +76,17 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
+                    {/* FINAL FORM ATTRIBUTES: name, method, action, and onSubmit */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
-                        onSubmit={handleSubmit} // RE-ENABLING HANDLER
+                        action="/?success=true" // EXPLICIT ACTION for Netlify
+                        onSubmit={handleSubmit} 
                         className="space-y-4"
                     >
-                        {/* CRITICAL: Netlify canonical hidden field */}
-                        <input type="hidden" name="form-name" value="estimate-request" /> 
+                        {/* We are REMOVING the hidden input type="hidden" name="form-name" here
+                            and relying on the form name and the encoded body construction for AJAX. 
+                        */}
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>

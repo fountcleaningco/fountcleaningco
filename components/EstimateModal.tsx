@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from './Button';
-import { EMAIL } from '../constants';
+// We no longer need EMAIL here for mailto, but we'll leave it just in case:
+import { EMAIL } from '../constants'; 
 
 interface EstimateModalProps {
   isOpen: boolean;
@@ -12,27 +13,34 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // 🛑 MODIFICATION 1: IMPLEMENT NETLIFY AJAX SUBMISSION
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
     
-    const subject = encodeURIComponent("New Estimate Request - Fount Cleaning Co.");
-    const body = encodeURIComponent(
-`Name: ${data.name}
-Email: ${data.email}
-Service Type: ${data.serviceType}
-Bedrooms: ${data.bedrooms}
-Bathrooms: ${data.bathrooms}
-Property Details: ${data.details}
+    // Netlify requires data to be submitted as application/x-www-form-urlencoded
+    const encoded = new URLSearchParams(formData as any).toString();
 
-Sent from website estimate form.`
-    );
+    try {
+      // Netlify will automatically detect this AJAX post to the current URL
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encoded
+      });
 
-    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
-
-    setSubmitted(true);
+      if (response.ok) {
+        // Success: Set the state to show your existing success message
+        setSubmitted(true);
+      } else {
+        // Handle failed submission
+        alert('Form submission failed. Please try again or email us directly.');
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert('An unexpected error occurred.');
+    }
   };
 
   return (
@@ -55,9 +63,19 @@ Sent from website estimate form.`
                 {!submitted ? (
                   <div className="mt-4">
                     <p className="text-sm text-slate-500 mb-6">
-                      Tell us a bit about your property, and we'll open your email client to send the request.
+                      Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* 🛑 MODIFICATION 2 & 3: ADD NETLIFY ATTRIBUTES AND HIDDEN FIELD */}
+                    <form 
+                        name="estimate-request" 
+                        method="POST" 
+                        data-netlify="true" 
+                        onSubmit={handleSubmit} 
+                        className="space-y-4"
+                    >
+                        {/* CRITICAL: Netlify hidden field must be included */}
+                        <input type="hidden" name="form-name" value="estimate-request" />
+
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>
                             <input name="name" type="text" id="name" required className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2" placeholder="Jane Doe" />
@@ -77,26 +95,26 @@ Sent from website estimate form.`
                             </select>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                             <div>
-                                <label htmlFor="bedrooms" className="block text-sm font-medium text-slate-700">Bedrooms</label>
-                                <select name="bedrooms" id="bedrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
-                                    <option>1</option>
-                                    <option>2</option>
-                                    <option>3</option>
-                                    <option>4</option>
-                                    <option>5+</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="bathrooms" className="block text-sm font-medium text-slate-700">Bathrooms</label>
-                                <select name="bathrooms" id="bathrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
-                                    <option>1</option>
-                                    <option>1.5</option>
-                                    <option>2</option>
-                                    <option>2.5</option>
-                                    <option>3+</option>
-                                </select>
-                            </div>
+                              <div>
+                                  <label htmlFor="bedrooms" className="block text-sm font-medium text-slate-700">Bedrooms</label>
+                                  <select name="bedrooms" id="bedrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
+                                      <option>1</option>
+                                      <option>2</option>
+                                      <option>3</option>
+                                      <option>4</option>
+                                      <option>5+</option>
+                                  </select>
+                              </div>
+                              <div>
+                                  <label htmlFor="bathrooms" className="block text-sm font-medium text-slate-700">Bathrooms</label>
+                                  <select name="bathrooms" id="bathrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
+                                      <option>1</option>
+                                      <option>1.5</option>
+                                      <option>2</option>
+                                      <option>2.5</option>
+                                      <option>3+</option>
+                                  </select>
+                              </div>
                         </div>
                         <div>
                             <label htmlFor="details" className="block text-sm font-medium text-slate-700">Property Details / Address</label>
@@ -105,9 +123,9 @@ Sent from website estimate form.`
                         
                         <div className="mt-5 sm:mt-6 flex gap-3">
                             <Button type="submit" className="w-full">
-                                Send Request via Email
+                                Send Estimate Request
                             </Button>
-                             <Button type="button" variant="outline" className="w-full" onClick={onClose}>
+                            <Button type="button" variant="outline" className="w-full" onClick={onClose}>
                                 Cancel
                             </Button>
                         </div>
@@ -121,7 +139,7 @@ Sent from website estimate form.`
                             </svg>
                         </div>
                         <p className="text-slate-600 mb-6">
-                            Thank you! Your email client should have opened with the details. Please hit send to complete the request.
+                            Success! Your request has been sent to our team. We will be in touch shortly.
                         </p>
                         <Button onClick={onClose} className="w-full">
                             Close

@@ -65,7 +65,7 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    {/* 🛑 MODIFICATION: REMOVED data-netlify="true" attribute */}
+                    {/* MODIFICATION: data-netlify="true" is removed, relying on index.html definition */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
@@ -105,5 +105,39 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                                   </select>
                               </div>
                               <div>
+                                  {/* SYNTAX FIX APPLIED HERE: Ensure both tags are properly closed with '>' */}
                                   <label htmlFor="bathrooms" className="block text-sm font-medium text-slate-700">Bathrooms</label>
-                                  <select name="bathrooms" id="bathrooms" className="mt-1 block w-full rounded-md border-slate-3
+                                  <select name="bathrooms" id="bathrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
+                                      <option>1</option>
+                                      <option>1.5</option>
+                                      <option>2</option>
+                                      <option>2.5</option>
+                                      <option>3+</option>
+                                  </select>
+                              </div>
+                        </div>
+                        <div>
+                            <label htmlFor="details" className="block text-sm font-medium text-slate-700">Property Details / Address</label>
+                            <textarea name="details" id="details" rows={3} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2" placeholder="123 Main St, Starkville..."></textarea>
+                        </div>
+                        
+                        <div className="mt-5 sm:mt-6 flex gap-3">
+                            <Button type="submit" className="w-full">
+                                Send Estimate Request
+                            </Button>
+                            <Button type="button" variant="outline" className="w-full" onClick={onClose}>
+                                Cancel
+                            </Button>
+                        </div>
+                    </form>
+                  </div>
+                ) : (
+                    <div className="mt-4 text-center py-6">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <p className="text-slate-600 mb-6">
+                            Success! Your request has been sent to our team. We will be in touch shortly.
+                        </p>

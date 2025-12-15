@@ -13,19 +13,27 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // MODIFICATION 1: IMPLEMENT NETLIFY AJAX SUBMISSION (This part is correct)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     
-    // Netlify requires data to be submitted as application/x-www-form-urlencoded
-    const encoded = new URLSearchParams(formData as any).toString();
+    // 🛑 FINAL FIX: Ensure the form-name field is explicitly included and correctly encoded.
+    // 1. Manually include the form name in the query string format.
+    const formName = form.getAttribute('name') || 'estimate-request';
+    let encoded = `form-name=${encodeURIComponent(formName)}`;
+
+    // 2. Iterate over all other form fields and append them.
+    for (const [key, value] of formData.entries()) {
+        encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+    }
 
     try {
-      // Netlify will automatically detect this AJAX post to the current URL
+      // Post the explicitly encoded data to the root path
       const response = await fetch("/", {
         method: "POST",
+        // CRITICAL: Must be application/x-www-form-urlencoded
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: encoded
       });
@@ -36,6 +44,7 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
       } else {
         // Handle failed submission
         alert('Form submission failed. Please try again or email us directly.');
+        console.error('Netlify response was not OK:', response.statusText);
       }
     } catch (error) {
       console.error("Submission error:", error);
@@ -65,14 +74,15 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    {/* MODIFICATION: data-netlify="true" is removed, relying on index.html definition */}
+                    {/* Form tag has the name and method, no netlify/data-netlify attribute */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
                         onSubmit={handleSubmit} 
                         className="space-y-4"
                     >
-                        {/* CRITICAL: Netlify hidden field must be included */}
+                        {/* We use the code above to extract the name, so this explicit input is technically redundant 
+                            with the manual encoding above, but we leave it for redundancy as a fallback. */}
                         <input type="hidden" name="form-name" value="estimate-request" />
 
                         <div>
@@ -105,7 +115,6 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                                   </select>
                               </div>
                               <div>
-                                  {/* SYNTAX FIX APPLIED HERE: Ensure both tags are properly closed with '>' */}
                                   <label htmlFor="bathrooms" className="block text-sm font-medium text-slate-700">Bathrooms</label>
                                   <select name="bathrooms" id="bathrooms" className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-[#F07F63] focus:ring-[#F07F63] sm:text-sm border p-2">
                                       <option>1</option>
@@ -127,32 +136,4 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                             </Button>
                             <Button type="button" variant="outline" className="w-full" onClick={onClose}>
                                 Cancel
-                            </Button>
-                        </div>
-                    </form>
-                  </div>
-                ) : (
-                    <div className="mt-4 text-center py-6">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <p className="text-slate-600 mb-6">
-                            Success! Your request has been sent to our team. We will be in touch shortly.
-                        </p>
-                        <Button onClick={onClose} className="w-full">
-                            Close
-                        </Button>
-                    </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default EstimateModal;
+                            </Button

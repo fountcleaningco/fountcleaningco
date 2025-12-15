@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react'; // Removed useState
 import Button from './Button';
 import { EMAIL } from '../constants'; 
 
@@ -8,9 +8,6 @@ interface EstimateModalProps {
 }
 
 const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
-  // NOTE: 'submitted' state and handleSubmit are removed for this diagnostic test.
-  // The form will now perform a standard HTML POST, which will cause a page refresh
-  // but should reliably register the form in Netlify's Forms tab.
 
   if (!isOpen) return null;
 
@@ -35,7 +32,7 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    {/* The form now relies on standard HTML POST and Netlify's redirect */}
+                    {/* The form now relies on standard HTML POST and forced redirect */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
@@ -43,6 +40,9 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                     >
                         {/* CRITICAL: Netlify requires this hidden field to link the dynamic form to the static definition */}
                         <input type="hidden" name="form-name" value="estimate-request" /> 
+                        
+                        {/* FINAL FIX: Redirects the user to the home page (/) on successful submission to avoid 404 */}
+                        <input type="hidden" name="_next" value="/" /> 
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>

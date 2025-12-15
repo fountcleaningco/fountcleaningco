@@ -8,47 +8,11 @@ interface EstimateModalProps {
 }
 
 const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
-  const [submitted, setSubmitted] = useState(false);
+  // NOTE: 'submitted' state and handleSubmit are removed for this diagnostic test.
+  // The form will now perform a standard HTML POST, which will cause a page refresh
+  // but should reliably register the form in Netlify's Forms tab.
 
   if (!isOpen) return null;
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    
-    // Ensure the form-name field is explicitly included and correctly encoded.
-    const formName = form.getAttribute('name') || 'estimate-request';
-    let encoded = `form-name=${encodeURIComponent(formName)}`;
-
-    // Iterate over all other form fields and append them.
-    for (const [key, value] of formData.entries()) {
-        encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
-    }
-
-    try {
-      // Post the explicitly encoded data to the root path
-      const response = await fetch("/", {
-        method: "POST",
-        // CRITICAL: Must be application/x-www-form-urlencoded
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encoded
-      });
-
-      if (response.ok) {
-        // Success: Set the state to show your existing success message
-        setSubmitted(true);
-      } else {
-        // Handle failed submission
-        alert('Form submission failed. Please try again or email us directly.');
-        console.error('Netlify response was not OK:', response.statusText);
-      }
-    } catch (error) {
-      console.error("Submission error:", error);
-      alert('An unexpected error occurred.');
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -64,24 +28,21 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                 <h3 className="text-2xl leading-6 font-bold text-slate-900 font-['Playfair_Display']" id="modal-title">
-                  {submitted ? 'Request Received!' : 'Get a Free Estimate'}
+                  Get a Free Estimate
                 </h3>
                 
-                {!submitted ? (
-                  <div className="mt-4">
+                <div className="mt-4">
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
+                    {/* The form now relies on standard HTML POST and Netlify's redirect */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
-                        onSubmit={handleSubmit} 
                         className="space-y-4"
                     >
-                        {/* CRITICAL: Netlify canonical hidden field */}
+                        {/* CRITICAL: Netlify requires this hidden field to link the dynamic form to the static definition */}
                         <input type="hidden" name="form-name" value="estimate-request" /> 
-                        {/* FINAL AJAX FIX: Redundant hidden field named after the form */}
-                        <input type="hidden" name="estimate-request" value="submitted" /> 
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>
@@ -138,21 +99,6 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                         </div>
                     </form>
                   </div>
-                ) : (
-                    <div className="mt-4 text-center py-6">
-                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                        <p className="text-slate-600 mb-6">
-                            Success! Your request has been sent to our team. We will be in touch shortly.
-                        </p>
-                        <Button onClick={onClose} className="w-full">
-                            Close
-                        </Button>
-                    </div>
-                )}
               </div>
             </div>
           </div>

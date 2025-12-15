@@ -78,7 +78,10 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                         onSubmit={handleSubmit} 
                         className="space-y-4"
                     >
-                        <input type="hidden" name="form-name" value="estimate-request" />
+                        {/* CRITICAL: Netlify canonical hidden field */}
+                        <input type="hidden" name="form-name" value="estimate-request" /> 
+                        {/* FINAL AJAX FIX: Redundant hidden field named after the form */}
+                        <input type="hidden" name="estimate-request" value="submitted" /> 
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>
@@ -153,7 +156,6 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
-        {/* ADDED MISSING CLOSING TAGS HERE */}
         </div>
       </div>
     </div>

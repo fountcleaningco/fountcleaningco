@@ -19,12 +19,11 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
     const form = e.currentTarget;
     const formData = new FormData(form);
     
-    // 🛑 FINAL FIX: Ensure the form-name field is explicitly included and correctly encoded.
-    // 1. Manually include the form name in the query string format.
+    // Ensure the form-name field is explicitly included and correctly encoded.
     const formName = form.getAttribute('name') || 'estimate-request';
     let encoded = `form-name=${encodeURIComponent(formName)}`;
 
-    // 2. Iterate over all other form fields and append them.
+    // Iterate over all other form fields and append them.
     for (const [key, value] of formData.entries()) {
         encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
     }
@@ -134,6 +133,30 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                             <Button type="submit" className="w-full">
                                 Send Estimate Request
                             </Button>
-                            <Button type="button" variant="outline" className="w-full" onClick={onClose}>
+                            {/* FIX APPLIED HERE: Added the missing '>' to close the tag */}
+                            <Button type="button" variant="outline" className="w-full" onClick={onClose}> 
                                 Cancel
-                            </Button
+                            </Button>
+                        </div>
+                    </form>
+                  </div>
+                ) : (
+                    <div className="mt-4 text-center py-6">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <p className="text-slate-600 mb-6">
+                            Success! Your request has been sent to our team. We will be in touch shortly.
+                        </p>
+                        <Button onClick={onClose} className="w-full">
+                            Close
+                        </Button>
+                    </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>

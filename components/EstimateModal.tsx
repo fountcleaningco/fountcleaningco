@@ -141,3 +141,18 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                         <p className="text-slate-600 mb-6">
                             Success! Your request has been sent to our team. We will be in touch shortly.
                         </p>
+                        <Button onClick={onClose} className="w-full">
+                            Close
+                        </Button>
+                    </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EstimateModal;

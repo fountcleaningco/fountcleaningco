@@ -1,4 +1,4 @@
-import React from 'react'; // Removed useState
+import React, { useState } from 'react';
 import Button from './Button';
 import { EMAIL } from '../constants'; 
 
@@ -8,8 +8,46 @@ interface EstimateModalProps {
 }
 
 const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
+  // RE-ENABLING STATE FOR AJAX
+  const [submitted, setSubmitted] = useState(false);
 
   if (!isOpen) return null;
+
+  // RE-ENABLING AJAX HANDLER
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    // ATOMIC ENCODING (Form-name must be first)
+    let encoded = `form-name=${encodeURIComponent('estimate-request')}`;
+
+    for (const [key, value] of formData.entries()) {
+        encoded += `&${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`;
+    }
+
+    try {
+      // POST to the root path with required headers
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encoded
+      });
+
+      if (response.ok) {
+        // SUCCESS: Show the modal success message
+        setSubmitted(true);
+      } else {
+        // FAILURE: Show the alert
+        alert('Form submission failed. Please try again or email us directly.');
+        console.error('Netlify response was not OK:', response.statusText);
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      alert('An unexpected error occurred.');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -25,24 +63,22 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
             <div className="sm:flex sm:items-start">
               <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                 <h3 className="text-2xl leading-6 font-bold text-slate-900 font-['Playfair_Display']" id="modal-title">
-                  Get a Free Estimate
+                  {submitted ? 'Request Received!' : 'Get a Free Estimate'}
                 </h3>
                 
-                <div className="mt-4">
+                {!submitted ? (
+                  <div className="mt-4">
                     <p className="text-sm text-slate-500 mb-6">
                       Tell us a bit about your property, and we'll send the request directly to our team.
                     </p>
-                    {/* The form now relies on standard HTML POST and forced redirect */}
                     <form 
                         name="estimate-request" 
                         method="POST" 
+                        onSubmit={handleSubmit} // RE-ENABLING HANDLER
                         className="space-y-4"
                     >
-                        {/* CRITICAL: Netlify requires this hidden field to link the dynamic form to the static definition */}
+                        {/* CRITICAL: Netlify canonical hidden field */}
                         <input type="hidden" name="form-name" value="estimate-request" /> 
-                        
-                        {/* FINAL FIX: Redirects the user to the home page (/) on successful submission to avoid 404 */}
-                        <input type="hidden" name="_next" value="/" /> 
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-slate-700">Full Name</label>
@@ -99,6 +135,21 @@ const EstimateModal: React.FC<EstimateModalProps> = ({ isOpen, onClose }) => {
                         </div>
                     </form>
                   </div>
+                ) : (
+                    <div className="mt-4 text-center py-6">
+                        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <p className="text-slate-600 mb-6">
+                            Success! Your request has been sent to our team. We will be in touch shortly.
+                        </p>
+                        <Button onClick={onClose} className="w-full">
+                            Close
+                        </Button>
+                    </div>
+                )}
               </div>
             </div>
           </div>

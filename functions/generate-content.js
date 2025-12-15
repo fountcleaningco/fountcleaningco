@@ -1,7 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// 1. ADD: Read the System Prompt from Netlify's Environment Variables
+// Read the System Prompt from Netlify's Environment Variables
 const GEMINI_SYSTEM_PROMPT = process.env.GEMINI_SYSTEM_PROMPT; 
 
 const ai = new GoogleGenAI({}); 
@@ -14,19 +14,13 @@ export default async (request, context) => {
   try {
     const { prompt } = await request.json();
 
-    // 2. CHANGE: Structure the contents to include both the system and user roles
+    // 1. CHANGE: Send the System Instruction via the 'config' object
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: [
-        {
-          role: "system", 
-          parts: [{ text: GEMINI_SYSTEM_PROMPT }] // <-- Sends the AI's persona
-        },
-        {
-          role: "user",
-          parts: [{ text: prompt }] // <-- Sends the user's message
-        }
-      ]
+      contents: [{ role: "user", parts: [{ text: prompt }] }], // Only send the user's message here
+      config: {
+         systemInstruction: GEMINI_SYSTEM_PROMPT, // <-- Passes the persona correctly
+      }
     });
 
     return new Response(JSON.stringify({

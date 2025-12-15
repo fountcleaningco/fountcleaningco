@@ -1,0 +1,1 @@
+// Images are handled via string paths in this environment

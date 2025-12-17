@@ -10,7 +10,6 @@
 
 [[redirects]]
   # 2. FORM SUCCESS: Explicitly directs the successful form submission to the root path (/).
-  # This should eliminate the 404 error and land you back on the homepage.
   from = "/?form-name=estimate-request" 
   to = "/" 
   status = 302
@@ -19,6 +18,8 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://generativelanguage.googleapis.com;"
+    # Removed: aistudiocdn.com and generativelanguage.googleapis.com
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self';"
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
